@@ -6,9 +6,25 @@
 #include<time.h>
 #define STRING_SIZE 256
 
+/********************************************************변경사항**************************************************************/
+/*
+* 전역변수 int magic_error 추가 : 25
+* struct Weapon, Unique 추가 : 45~57
+* player 구조체에 int character, struct Unique unique 추가 : 66, 70
+* void unique_ability(struct player* p) 함수 추가
+* void character_choice(struct player* p) 함수 추가
+* character_choice(players) 함수 삽입 : 209
+* player_hand 함수와 마나 출력을 field 함수에 통합 : 916~925
+* 공격명령어 받는 부분 수정 : 307~378
+* 고유능력 명령어 받는 부분 추가 : 417~429
+* draw_player함수 수정
+* attack, player_attack 함수 수정
+*/
+
+
 /*******************************************************************************************************************/
 int turn = 0;
-int state = 0;
+int state = 1;
 int p1_draw = 0;
 int p2_draw = 0;
 int game_cost = 1;
@@ -16,8 +32,10 @@ int possibe_cost = 1;
 int total_turn = 0;
 int p1_draw_damage = 1;
 int p2_draw_damage = 1;
+int magic_error = 0;
 // 카드 정보
 struct card {
+	int num;
 	int type; // 1차 때 int num 이었던 것 2차 때 type으로 변경
 	int tribe; // 2차 추가
 	char name[100];
@@ -36,7 +54,19 @@ struct user {
 	char pwd[17];
 	char nick[9];
 };
+struct Weapon
+{
+	int mounting;
+	int weapon_attack;
+	int weapon_durability;
+};
 
+struct Unique
+{
+	int use;
+	int shield;
+	struct Weapon weapon;
+};
 //플레이어 정보
 struct player {
 	char name[9];
@@ -44,9 +74,11 @@ struct player {
 	struct card deck[30];
 	struct card hand[10];
 	struct card field[6];
+	struct Unique unique;
 	int fieldon[6];
 	int handnum;
 	int fieldnum;
+	int character;
 };
 
 /*******************************************************************************************************************/
@@ -71,6 +103,8 @@ void game_menu(struct player* p);
 void who_first();
 void trim(char* str, char* cpy, int cpy_len);
 void deck_setting(struct player* p, int t);
+void unique_ability(struct player* p);  //캐릭터 고유능력
+void character_choice(struct player* p);   //캐릭터 선택
 
 /*******************************************************************************************************************/
 //메인 함수
@@ -79,9 +113,12 @@ int main()
 	struct card cardlist[44];
 	struct user userlist[100];
 	struct player players[2];
+	strcpy(players[0].name, "a");
+	strcpy(players[1].name, "enemy");
 	FILE* cardFile = fopen("card.txt", "r");
 	int index = 0;
 	int card_index, my_card, target;
+	srand(time(NULL));
 	if (cardFile != NULL) {
 		char buffer[STRING_SIZE];
 		while (!feof(cardFile)) {
@@ -230,6 +267,7 @@ int main()
 		else if (state == 2) {
 			rule(); // 게임룰 출력
 			getchar(); // 아무키나 입력시 다음 화면으로
+			character_choice(players);
 			who_first(); // 선공, 후공 결정
 
 			//난수 생성할 때마다 다른 결과가 나오도록 시드값 조정
@@ -274,14 +312,14 @@ int main()
 					players[0].deck[i].att_state = 1;
 				}
 				else {
-					players[0].deck[i].att_state = -1;
+				players[0].deck[i].att_state = -1;
 				}
 				if (players[1].deck[i].ability == 1) {
 					players[1].deck[i].att_state = 1;
 				}
 				else {
-					players[1].deck[i].att_state = -1;
-				}
+				players[1].deck[i].att_state = -1;
+			}
 			}
 			// 2차 추가 -  속공 추가로 인한 변경 여기까지
 
@@ -296,7 +334,9 @@ int main()
 			char com;
 			int t1, t2;
 			char t2_string[STRING_SIZE];
+			char t1_string[STRING_SIZE];
 			char trim_t2[STRING_SIZE];
+			char trim_t1[STRING_SIZE];
 			int k = 0;
 			int space_count = 0;
 			int ann;
@@ -312,7 +352,8 @@ int main()
 				if (com == 'a' || com == 'A' || space_count!=0) {
 					ann = getchar();
 					if (ann == ' ' || ann == '\t') {
-						scanf(" %d", &t1);
+						/////////////////공격 명령어 받는 부분 수정
+						scanf(" %s", t1_string);
 						ann = getchar();
 						if (ann == ' ' || ann == '\t') {
 							scanf(" %s", t2_string);
@@ -333,14 +374,54 @@ int main()
 						k = 1;
 					}
 					if (k != 1) {
+						trim(t1_string, trim_t1, STRING_SIZE);
 						trim(t2_string, trim_t2, STRING_SIZE);
 
 						system("cls");
-
-						if (strcmp(trim_t2, "player") == 0 || strcmp(trim_t2, "Player") == 0) {
-							player_attack(t1, players);
+						if (strcmp(trim_t1, "player") == 0 || strcmp(trim_t1, "Player") == 0)
+						{
+							if (players[turn].character == 2)
+							{
+								if (players[turn].unique.weapon.mounting == 1)
+								{
+									t1 = 0;
+								}
+								else
+								{
+									k = 1;
+								}
+							}
+							else
+							{
+								k = 1;
+							}
 						}
 						else {
+							if (strcmp(trim_t1, "1") == 0) {
+								t1 = 1;
+							}
+							else if (strcmp(trim_t1, "2") == 0) {
+								t1 = 2;
+							}
+							else if (strcmp(trim_t1, "3") == 0) {
+								t1 = 3;
+							}
+							else if (strcmp(trim_t1, "4") == 0) {
+								t1 = 4;
+							}
+							else if (strcmp(trim_t1, "5") == 0) {
+								t1 = 5;
+							}
+							else if (strcmp(trim_t1, "6") == 0) {
+								t1 = 6;
+							}
+						}
+
+						if ((strcmp(trim_t2, "player") == 0 || strcmp(trim_t2, "Player") == 0) && k != 1) {
+							player_attack(t1, players);
+						}
+						else 
+						{
 							if (strcmp(trim_t2, "1") == 0) {
 								t2 = 1;
 							}
@@ -359,9 +440,12 @@ int main()
 							else if (strcmp(trim_t2, "6") == 0) {
 								t2 = 6;
 							}
-							attack(t1, t2, players);
+							if (k != 1)
+							{
+								attack(t1, t2, players);
+							}
 						}
-						k = 0;
+						//k = 0;
 					}
 				}
 				else if (com == 'h' || com == 'H') {
@@ -399,6 +483,20 @@ int main()
 						quit(players);
 					}
 				}
+				////////////캐릭터 고유능력
+				else if (com == 'u' || com == 'U')
+				{
+					while ((ann = getchar()) != '\n') {
+						if (ann == ' ' || ann == '\t') {
+						}
+						else {
+							k = 1;
+						}
+					}
+					if (k != 1) {
+						unique_ability(players);
+					}
+				}
 				//a, q, h 이외의 첫 문자를 입력했을 경우
 				else {
 					k = 1;
@@ -407,7 +505,7 @@ int main()
 				if(k==1) {
 					system("cls");
 					printf("제대로 입력한게 맞는지 확인해줘 !\n");
-					printf("\t올바른 입력 예시 : h/H 1, a/A 1 2, q/Q\n");
+					printf("\t올바른 입력 예시 : h/H 1, a/A 1 2, q/Q, u/U \n");
 				}
 
 				if (players[0].hp <= 0) {
@@ -603,33 +701,33 @@ void plusmember(struct user* userlist, int* userindex)
 	char id[STRING_SIZE];
 	char pwd[STRING_SIZE];
 	int error = 0;
-	printf("\n");
-	printf("┌───────────────────────────┐\n");
-	printf("│                           │\n");
-	printf("│  id: [        ] (4 ~ 12)  │\n");
-	printf("│                           │\n");
-	printf("│  pw: [        ] (8 ~ 16 ) │\n");
-	printf("│                           │\n");
-	printf("└───────────────────────────┘\n");
+		printf("\n");
+		printf("┌───────────────────────────┐\n");
+		printf("│                           │\n");
+		printf("│  id: [        ] (4 ~ 12)  │\n");
+		printf("│                           │\n");
+		printf("│  pw: [        ] (8 ~ 16 ) │\n");
+		printf("│                           │\n");
+		printf("└───────────────────────────┘\n");
 	// 1차 때 누락되어 2차 때 다시 추가 - 오류 메시지 여기부터
 	do{
 		printf("사용하실 아이디를 입력해주세요 : ");
 		scanf("%[^\n]s", id);
 		getchar();
 		error = 0;
-		if (strlen(id) < 4)
+		if (strlen(id) < 4) 
 		{
 			printf("id의 길이가 정해진 길이 미만입니다.\n");
 			error++;
 		}
-		else if (strlen(id) > 12)
+		else if (strlen(id) > 12) 
 		{
 			printf("id의 길이가 정해진 길이를 초과합니다.\n");
 			error++;
 		}
-		for (int i = 0; i < strlen(id); i++)
+		for (int i = 0; i < strlen(id); i++) 
 		{
-			if (!((id[i] >= 48 && id[i] <= 57) || (id[i] >= 65 && id[i] <= 90) || (id[i] >= 97 && id[i] <= 122)))
+			if (!((id[i] >= 48 && id[i] <= 57) || (id[i] >= 65 && id[i] <= 90) || (id[i] >= 97 && id[i] <= 122))) 
 			{
 				printf("id에 알파벳과 숫자 이외의 문자가 포함되어 있습니다.\n");
 				error++;
@@ -651,19 +749,19 @@ void plusmember(struct user* userlist, int* userindex)
 		scanf("%[^\n]s", pwd);
 		getchar();
 		error = 0;
-		if (strlen(pwd) < 8)
+		if (strlen(pwd) < 8) 
 		{
 			printf("pw의 길이가 정해진 길이 미만입니다.\n");
 			error++;
 		}
-		else if (strlen(pwd) > 16)
+		else if (strlen(pwd) > 16) 
 		{
 			printf("pw의 길이가 정해진 길이를 초과합니다.\n");
 			error++;
 		}
-		for (int i = 0; i < strlen(pwd); i++)
+		for (int i = 0; i < strlen(pwd); i++) 
 		{
-			if (!((pwd[i] >= 48 && pwd[i] <= 57) || (pwd[i] >= 65 && pwd[i] <= 90) || (pwd[i] >= 97 && pwd[i] <= 122)))
+			if (!((pwd[i] >= 48 && pwd[i] <= 57) || (pwd[i] >= 65 && pwd[i] <= 90) || (pwd[i] >= 97 && pwd[i] <= 122))) 
 			{
 				printf("pw에 알파벳과 숫자 이외의 문자가 포함되어 있습니다.\n");
 				error++;
@@ -778,13 +876,16 @@ void rule()
 	printf(" 플레이어 카드\n");
 	printf("┌───────────┐\n");
 	printf("│  (닉네임) │\n");
-	for (int i = 0; i < 5; i++) 
+	printf("│  (캐릭터) │\n");
+	for (int i = 0; i < 3; i++) 
 	{
 		printf("│           │\n");
 	}
+	printf("│(추가 정보)│\n");
 	printf("│      hp: ?│\n");
 	printf("└───────────┘\n");
-	printf(" 플레이어 카드에는 사용자의 닉네임과 체력 상태가 표시됩니다.\n");
+	printf(" 플레이어 카드에는 사용자의 닉네임과 캐릭터 정보, 체력 상태가 표시됩니다.\n");
+	printf(" 추가 정보에는 캐릭터에 따라 방어력, 무기 공격력, 내구도가 표시됩니다,\n");
 
 	printf("\n\n 빈 카드\n");
 	printf("┌───────────┐\n");
@@ -826,6 +927,8 @@ void rule()
 	printf(" ex) h/H \"낼 카드의 번호 및 이름\"\n\n");
 	printf(" q/Q : Quit의 약어로써 플레이어의 턴을 마치고 상대에게 턴을 넘깁니다.\n");
 	printf(" ex) q/Q \n\n");
+	printf(" u/U : 캐릭터의 고유능력을 사용합니다.\n");
+	printf(" ex) u/U \n\n");
 }
 
 void GotoXY(int x, int y)
@@ -886,6 +989,16 @@ void field(struct player player1, struct player player2)
 			}
 		}
 	}
+	if (turn == 0)
+	{
+		player_hand(player1);
+	}
+	else
+	{
+		player_hand(player2);
+	}
+	GotoXY(110, 43);
+	printf("Mana Cost (%d/%d)", game_cost, possibe_cost);
 }
 
 void empty_card(int x, int y, int j)
@@ -954,6 +1067,43 @@ void draw_player(int x, int y, int i, struct player player)
 	}
 	else if (i == 1) {
 		printf("│ %8s  │", player.name);
+	}
+	else if (i == 2)
+	{
+		if (player.character == 0)
+		{
+			printf("│   warrior │");
+		}
+		else if (player.character == 1)
+		{
+			printf("│   Wizard  │");
+		}
+		else if (player.character == 2)
+		{
+			printf("│   thief   │");
+		}
+	}
+	else if (i == 6)
+	{
+		if (player.character == 0)
+		{
+			printf("│ shield:%2d │", player.unique.shield);
+		}
+		else if(player.character == 1)
+		{
+			printf("│           │");
+		}
+		else if (player.character == 2)
+		{
+			if (player.unique.weapon.mounting==1)
+			{
+				printf("│atk:%d dur:%d│", player.unique.weapon.weapon_attack, player.unique.weapon.weapon_durability);
+			}
+			else
+			{
+				printf("│           │");
+			}
+		}
 	}
 	else if (i == 7) {
 		printf("│      hp:%2d│", player.hp);
@@ -1024,14 +1174,16 @@ void hand_out(int card_num, struct player* p)
 	}
 }
 
+///////attack, player_attack함수 수정
+
 void attack(int my_card, int target, struct player* p)
 {
 	int n = 0; // 2차 추가 도발
 	if (my_card < 1 || my_card>6 || target > 6 || target < 1) {
+		magic_error = 1;
 		printf(" 거기엔 아무것도 없다구 !\n");
 	}
-	else if (p[turn].fieldon[my_card-1]==1 &&p[!turn].fieldon[target-1]==1)
-	{
+	else if (p[turn].fieldon[my_card-1]==1 &&p[!turn].fieldon[target-1]==1){
 		// 2차 추가 도발 여기부터
 		for (int i = 0; i < 5; i++) {
 			if (p[!turn].fieldon[i] == 1) {
@@ -1086,7 +1238,52 @@ void attack(int my_card, int target, struct player* p)
 		}
 		// 2차 추가 도발 여기까지
 	}
+
+
+
+	else if (my_card == 0 && p[!turn].fieldon[target - 1] == 1)
+	{
+		magic_error = 0;
+		printf("\n\"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].name, p[!turn].field[target - 1].name);
+		p[!turn].field[target - 1].hp -= p[turn].unique.weapon.weapon_attack;
+		p[turn].unique.weapon.weapon_durability -= 1;
+		if (p[!turn].field[target - 1].hp <= 0)
+		{
+			p[!turn].fieldon[target - 1] = 0;
+			p[!turn].fieldnum--;
+		}
+		if (p[turn].unique.weapon.weapon_durability <= 0)
+		{
+			p[turn].unique.weapon.mounting = 0;
+		}
+	}
+	else if (p[turn].fieldon[my_card-1]==1 &&p[!turn].fieldon[target-1]==1)
+	{
+		if (p[turn].field[my_card - 1].att_state == -1) {
+			printf(" 그 하수인은 아직 마음의 준비가 안 됐어 \n");
+		}
+		else if (p[turn].field[my_card - 1].att_state == 0) {
+			printf(" 그 하수인은 이미 공격을 했다구 !\n");
+		}
+		else {
+			 printf("\n \"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].field[my_card - 1].name, p[!turn].field[target - 1].name);
+			 p[turn].field[my_card - 1].hp -= p[!turn].field[target - 1].atk;
+			 p[!turn].field[target - 1].hp -= p[turn].field[my_card - 1].atk;
+			 p[turn].field[my_card - 1].att_state = 0;
+			 if (p[turn].field[my_card - 1].hp <= 0)
+			 {
+				 p[turn].fieldon[my_card - 1] = 0;
+				 p[turn].fieldnum--;
+			 }
+			 if (p[!turn].field[target - 1].hp <= 0)
+			 {
+				 p[!turn].fieldon[target - 1] = 0;
+				 p[!turn].fieldnum--;
+			 }
+		 }
+	}
 	else {
+		magic_error = 1;
 		printf(" 거기엔 아무것도 없다구 !\n");
 	}
 }
@@ -1095,6 +1292,39 @@ void player_attack(int my_card, struct player* p)
 {
 	if (my_card < 1 || my_card >6) {
 		printf(" 거기엔 아무것도 없다구 !\n");
+	}
+	else if (my_card == 0)
+	{
+		printf("\n\"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].name, p[!turn].name);
+		if (p[!turn].character == 0)
+		{
+			if (p[!turn].unique.shield>0)
+			{
+				int aaa = p[!turn].unique.shield - p[turn].unique.weapon.weapon_attack;
+				if (aaa < 0)
+				{
+					p[!turn].unique.shield = 0;
+					p[!turn].hp += aaa;
+				}
+				else
+				{
+					p[!turn].unique.shield = aaa;
+				}
+			}
+			else
+			{
+				p[!turn].hp -= p[turn].unique.weapon.weapon_attack;
+			}
+		}
+		else
+		{
+			p[!turn].hp -= p[turn].unique.weapon.weapon_attack;
+		}
+		p[turn].unique.weapon.weapon_durability -= 1;
+		if (p[turn].unique.weapon.weapon_durability <= 0)
+		{
+			p[turn].unique.weapon.mounting = 0;
+		}
 	}
 	else if (p[turn].fieldon[my_card - 1] == 1) {
 		if (p[turn].field[my_card - 1].att_state == -1) {
@@ -1105,7 +1335,30 @@ void player_attack(int my_card, struct player* p)
 		}
 		else {
 			printf("\n \"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].field[my_card - 1].name, p[!turn].name);
-			p[!turn].hp -= p[turn].field[my_card - 1].atk;
+			if (p[!turn].character == 0)
+			{
+				if (p[!turn].unique.shield > 0)
+				{
+					int aaa = p[!turn].unique.shield - p[turn].field[my_card - 1].atk;
+					if (aaa < 0)
+					{
+						p[!turn].unique.shield = 0;
+						p[!turn].hp += aaa;
+					}
+					else
+					{
+						p[!turn].unique.shield = aaa;
+					}
+				}
+				else
+				{
+					p[!turn].hp -= p[turn].field[my_card - 1].atk;
+				}
+			}
+			else
+			{
+				p[!turn].hp -= p[turn].field[my_card - 1].atk;
+			}
 			p[turn].field[my_card - 1].att_state = 0;
 		}
 	}
@@ -1117,6 +1370,7 @@ void player_attack(int my_card, struct player* p)
 void quit(struct player* p)
 {	
 	game_cost = possibe_cost;
+	p[turn].unique.use = 0;
 	if (turn == 0) {
 		printf("\"%s\" 님의 턴 종료 !\n", p[turn].name);
 		for (int i = 0; i < 6; i++) {
@@ -1197,4 +1451,176 @@ void trim(char* str, char* cpy, int cpy_len)
 		cpy[j] = str[i];
 	}
 	cpy[j] = '\0';
+}
+
+///////추가 함수
+void unique_ability(struct player* p)
+{
+	if (p[turn].unique.use == 1) 
+	{
+		system("cls");
+		printf("더 이상 쓸 수 없어...");
+		return;
+	}
+	if (game_cost >= 2)
+	{
+		if (p[turn].character == 0)
+		{
+			p[turn].unique.shield += 2;
+			game_cost -= 2;
+			p[turn].unique.use = 1;
+			system("cls");
+		}
+		else if (p[turn].character == 1)
+		{
+			char att[STRING_SIZE];
+			char tmp[STRING_SIZE];
+			int ch;
+			p[turn].unique.weapon.weapon_attack = 1;
+			p[turn].unique.weapon.weapon_durability = 100;
+			while (1)
+			{
+				GotoXY(3, 61);
+				printf("공격할 대상을 입력하세요: ");
+				scanf(" %s", &att);
+				trim(att, tmp, STRING_SIZE);
+				if (strcmp(tmp, "player") == 0 || strcmp(tmp, "Player") == 0)
+				{
+					game_cost -= 2;
+					p[turn].unique.use = 1;
+					system("cls");
+					player_attack(0, p);
+					break;
+				}
+				else
+				{
+					if (strcmp(tmp, "1") == 0) {
+						ch = 1;
+					}
+					else if (strcmp(tmp, "2") == 0) {
+						ch = 2;
+					}
+					else if (strcmp(tmp, "3") == 0) {
+						ch = 3;
+					}
+					else if (strcmp(tmp, "4") == 0) {
+						ch = 4;
+					}
+					else if (strcmp(tmp, "5") == 0) {
+						ch = 5;
+					}
+					else if (strcmp(tmp, "6") == 0) {
+						ch = 6;
+					}
+					else if (atoi(tmp) != 0)
+					{
+						ch = atoi(tmp);
+					}
+					else
+					{
+						system("cls");
+						printf("제대로 입력한게 맞는지 확인해줘 !\n");
+						printf("\t올바른 입력 예시 : 1, player/Player \n");
+						field(p[0], p[1]);
+						continue;
+					}
+					system("cls");
+					attack(0, ch, p);
+					field(p[0], p[1]);
+					if (magic_error == 0)
+					{
+						game_cost -= 2;
+						p[turn].unique.use = 1;
+						break;
+					}
+				}
+			}
+		}
+		else if (p[turn].character == 2)
+		{
+			system("cls");
+			if (p[turn].unique.weapon.mounting == 0)
+			{
+				p[turn].unique.weapon.mounting = 1;
+				p[turn].unique.weapon.weapon_attack = 1;
+				p[turn].unique.weapon.weapon_durability = 2;
+				game_cost -= 2;
+				p[turn].unique.use = 1;
+			}
+			else if (p[turn].unique.weapon.mounting == 1)
+			{
+				printf("이미 무기가 장착되어 있어!");
+			}
+		}
+	}
+	else
+	{
+		system("cls");
+		printf("아직 쓸 수 없어...");
+	}
+}
+
+void character_choice(struct player* p)
+{
+	char choice[STRING_SIZE];
+	char tmp[STRING_SIZE];
+	system("cls");
+	while (1)
+	{
+		printf("┌─────────────┐\n");
+		printf("│ 1. 전사     │\n");
+		printf("└─────────────┘\n");
+		printf("┌─────────────┐\n");
+		printf("│ 2. 마법사   │\n");
+		printf("└─────────────┘\n");
+		printf("┌─────────────┐\n");
+		printf("│ 3. 도적     │\n");
+		printf("└─────────────┘\n");
+		printf("\n 원하시는 캐릭터를 선택해주세요: ");
+		scanf("%[^\n]s", choice);
+		getchar();
+		trim(choice, tmp, STRING_SIZE);
+		if (strcmp(tmp, "전사") == 0 || strcmp(tmp, "1") == 0)
+		{
+			p[0].character = 0;
+			p[0].unique.shield = 0;
+			break;
+		}
+		else if (strcmp(tmp, "마법사") == 0 || strcmp(tmp, "2") == 0)
+		{
+			p[0].character = 1;
+			break;
+		}
+		else if (strcmp(tmp, "도적") == 0 || strcmp(tmp, "3") == 0)
+		{
+			p[0].character = 2;
+			p[0].unique.weapon.mounting = 0;
+			break;
+		}
+		else
+		{
+			system("cls");
+			printf("올바른 명령어를 입력해주세요!\n");
+			printf("\"1\",\"전사\",\"2\",\"마법사\",\"3\",\"도적\"\n");
+		}
+	}
+	while (1)
+	{
+		int r = rand() % 3;
+		if (r != p[0].character)
+		{
+			p[1].character = r;
+			if (p[1].character == 0)
+			{
+				p[1].unique.shield = 0;
+			}
+			else if (p[1].character == 2)
+			{
+				p[1].unique.weapon.mounting = 0;
+			}
+			break;
+		}
+	}
+	p[0].unique.use = 0;
+	p[1].unique.use = 0;
 }
