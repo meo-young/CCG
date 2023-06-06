@@ -1647,7 +1647,7 @@ void player_attack(int my_card, struct player* p)
 		else if (p[turn].field[my_card - 1].att_state == 0) {
 			printf(" 그 하수인은 이미 공격을 했다구 !\n");
 		}
-		else if (n = 0) {
+		else if (n == 0) {
 			printf("\n \"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].field[my_card - 1].name, p[!turn].name);
 			if (p[!turn].character == 0)
 			{
