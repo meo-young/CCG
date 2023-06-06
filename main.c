@@ -1484,7 +1484,7 @@ void hand_out(int card_num, struct player* p){
 void attack(int my_card, int target, struct player* p)
 {
 	int n = 0; // 2차 추가 도발
-	if (my_card < 1 || my_card>6 || target > 6 || target < 1) {
+	if (my_card < 0 || my_card>6 || target > 6 || target < 1) {
 		magic_error = 1;
 		printf(" 거기엔 아무것도 없다구 !\n");
 	}
@@ -1596,7 +1596,7 @@ void attack(int my_card, int target, struct player* p)
 void player_attack(int my_card, struct player* p)
 {
 	int n = 0;
-	if (my_card < 1 || my_card >6) {
+	if (my_card < 0 || my_card >6) {
 		printf(" 거기엔 아무것도 없다구 !\n");
 	}
 	else if (my_card == 0)
