@@ -316,7 +316,7 @@ int main()
 				}
 			}
 
-	
+
 
 			//처음 소환한 하수인은 공격 못 하도록 상태 설정
 			// 2차 추가 -  속공 추가로 인한 변경 여기부터
@@ -1140,7 +1140,7 @@ void player_hand(struct player player)
 	}
 }
 
-void hand_out(int card_num, struct player* p){
+void hand_out(int card_num, struct player* p) {
 	int handed = 0;
 	int steal_count = 0;
 	if (p[turn].handnum == 0) {
@@ -1419,10 +1419,10 @@ void hand_out(int card_num, struct player* p){
 		}
 		else if (p[turn].hand[card_num - 1].ability == 7) {
 			if (strcmp(p[turn].hand[card_num - 1].name, "enlight") == 0) {
-				enlight_count = 1;
+				enlight_count++;
 			}
 			else if (strcmp(p[turn].hand[card_num - 1].name, "magic study") == 0) {
-				magic_study_count = 1;
+				magic_study_count++;
 			}
 			else if (strcmp(p[turn].hand[card_num - 1].name, "steal") == 0) {
 				if (p[!turn].handnum >= 1) {
@@ -1455,12 +1455,12 @@ void hand_out(int card_num, struct player* p){
 	{
 		printf(" 전장에 빈 자리가 없는걸 ?");
 	}
-	
+
 	if (handed == 1) {
 		return;
 	}
 	else if (handed == 0) {
-		if (enlight_count == 1 && p[turn].character == 1) {
+		if (enlight_count == 1 && p[turn].character == 1 && p[turn].hand[card_num-1].type == 1) {
 			game_cost -= p[turn].hand[card_num - 1].cost;
 			game_cost++;
 		}
@@ -1470,13 +1470,13 @@ void hand_out(int card_num, struct player* p){
 		printf("\"%s\"님이 \"%s\"카드를 냈습니다 !\n", p[turn].name, p[turn].hand[card_num - 1].name);
 		printf("%s : %s", p[turn].hand[card_num - 1].name, p[turn].hand[card_num - 1].line);
 		if (steal_count == 0) {
-			for (int i = card_num - 1; i < sizeof(p[turn].hand) / sizeof(struct card); i++){
+			for (int i = card_num - 1; i < sizeof(p[turn].hand) / sizeof(struct card); i++) {
 				p[turn].hand[i] = p[turn].hand[i + 1];
 			}
 			p[turn].handnum--;
 		}
 	}
-		system("cls");
+	system("cls");
 }
 
 ///////attack, player_attack함수 수정
@@ -1647,7 +1647,7 @@ void player_attack(int my_card, struct player* p)
 		else if (p[turn].field[my_card - 1].att_state == 0) {
 			printf(" 그 하수인은 이미 공격을 했다구 !\n");
 		}
-		else if(n = 0) {
+		else if (n = 0) {
 			printf("\n \"%s\"가 \"%s\"를 공격하였습니다 !\n", p[turn].field[my_card - 1].name, p[!turn].name);
 			if (p[!turn].character == 0)
 			{
