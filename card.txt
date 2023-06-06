@@ -1,16 +1,44 @@
-0 coin 0 0 0 mana_plus
-1 rat 1 2 1 I_am_mouse
-2 cow 5 4 6 I_am_cow
-3 tiger 7 8 8 I_am_tiger
-4 rabbit 2 1 3 I_am_rabbit
-5 dragon 10 10 10 I_am_dragon
-6 snake 4 4 2 I_am_snake
-7 horse 5 5 5 I_am_horse
-8 sheep 4 2 4 I_am_sheep
-9 monkey 3 3 4 I_am_monkey
-10 chicken 1 1 2 I_am_chicken
-11 dog 3 4 3 I_am_dog
-12 pig 4 4 4 I_am_pig
-13 line 7 8 8 I_am_lion
-14 elephant 9 9 9 I_am_elephant
-15 eligator 6 8 5 I_am_crocodile
+1 0 coin 0 0 0 0 mana_plus
+1 0 draw_card 2 0 1 2 draw_card
+0 1 supplier 1 1 3 0 I_am_supplier
+0 1 warrior 1 2 2 0 I_am_warrior
+0 1 defender 3 1 5 2 I_am_defender
+0 1 swordsman 3 3 3 0 I_am_swordsman
+0 1 spear_warrior 3 4 2 0 I_am_spear_warrior
+0 1 scout 4 4 4 1 I_am_scout
+0 1 berserker 4 5 3 3 I_am_berserker
+0 1 werewolf 5 5 5 0 I_am_werewolf
+0 1 knight 6 6 6 1 I_am_knight
+0 1 army 7 7 7 2 We_are_army
+0 1 dragon_knight 9 9 8 3 We_are_dragon_knight
+0 1 King 10 10 10 3 I_am_King
+1 1 stoneskin 3 0 8 3 stoneskin
+1 1 training 2 3 3 4 training
+0 2 novice 1 1 2 0 I_am_novice
+0 2 magician 2 2 3 0 I_am_magician
+0 2 statue 5 1 9 2 I_am_statue
+0 2 wizard 5 5 6 0 I_am_wizard
+0 2 Grand_wizard 10 10 10 4 I_am_Grand_wizard
+1 2 acceleration 5 0 3 2 acceleration
+1 2 electric_shock 2 3 0 5 electric_shock
+1 2 fireball 4 6 0 5 fireball
+1 2 mana_missile 10 10 0 5 mana_missile
+1 2 blizzard 5 3 0 6 blizzard
+1 2 hellfire 8 5 0 6 hellfire
+1 2 meditation 0 0 2 1 meditation
+1 2 enlight 3 0 0 0 enlight
+1 2 magic_study 3 0 0 0 magic_study
+0 3 stray_cat 1 2 1 0 I_am_stray_cat
+0 3 thief 2 3 1 0 I_am_thief
+0 3 bandit 3 4 2 1 I_am_bandit
+0 3 plunderer 3 2 4 2 I_am_plunderer
+0 3 ninja 4 5 3 1 I_am_ninja
+0 3 terrorist 5 7 2 1 I_am_terrorist
+0 3 mysterious_thief 6 7 6 1 I_am_mysterious_thief
+0 3 lucky_guy 7 7 7 0 I_am_lucky_guy
+0 3 assassin 8 9 7 1 I_am_assassin
+0 3 Joker 9 10 9 4 I_am_Joker
+1 3 poisoning 1 2 0 7 poisoning
+1 3 temper 2 0 2 7 temper
+1 3 sudden_attack 2 4 0 5 sudden_attack
+1 3 steal 2 0 0 0 steal

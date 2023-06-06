@@ -115,7 +115,7 @@ int main()
 				}
 				else {
 					printf("카드 정보를 불러올 수 없습니다.\n프로그램을 종료합니다.");
-					return 0;
+					return;
 				}
 				ptr = strtok(NULL, " ");
 				ab++;
@@ -126,7 +126,7 @@ int main()
 	}
 	else {
 		printf("카드 정보를 불러올 수 없습니다.\n프로그램을 종료합니다.");
-		return 0;
+		return;
 	}
 
 	FILE* userFiletest = fopen("user.txt", "r");
